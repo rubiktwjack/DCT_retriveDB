@@ -20,34 +20,22 @@ router.get("/", function(req, res, next) {
   // retrieve dtabase
   var rate, num;
   var database = firebase.database();
-  retriveDB();
 
-  function retriveDB() {
-    database.ref("elderly/").on("value", function(snapshot) {
-      num = snapshot.numChildren();
-      for (var i = 1; i <= num; i++) {
-        database.ref("elderly/" + i + "/").on("value", function(snapshot) {
-          console.log(snapshot.val());
-          rate = snapshot.val().heartRate;
-          var dataString = rate + "\r\n";
-          //console.log(dataString);
-          if (i == 1) {
-            fs.writeFile("heartrate.txt", dataString, function(err) {
-              if (err) console.log(err);
-              else console.log("Write operation complete.");
-            });
-          } else {
-            fs.appendFile("heartrate.txt", dataString, function(err) {
-              if (err) console.log(err);
-              else console.log("Append operation complete.");
-            });
-          }
+  database.ref("elderly/").on("value", function(snapshot) {
+    var dataString = "";
+    num = snapshot.numChildren();
+    for (var i = 1; i <= num; i++) {
+      database.ref("elderly/" + i + "/").on("value", function(snapshot) {
+        console.log(snapshot.val());
+        rate = snapshot.val().heartRate;
+        dataString += rate + "\r\n";
+        fs.writeFile("a.txt", dataString, function(err) {
+          if (err) console.log(err);
+          else console.log("Write operation complete.");
         });
-      }
-    });
-  }
-
-  setTimeout("retriveDB()", 1000);
+      });
+    }
+  });
 });
 
 module.exports = router;
